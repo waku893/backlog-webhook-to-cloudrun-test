@@ -100,6 +100,7 @@ resource "google_cloudfunctions2_function_iam_member" "invoker" {
   cloud_function = google_cloudfunctions2_function.function.name
   role           = "roles/run.invoker"
   member         = "allUsers"
+  depends_on     = [google_cloudfunctions2_function.function]
 }
 
 resource "google_app_engine_application" "app" {
