@@ -5,6 +5,7 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/function.zip
 terraform.tfstate
+terraform_*.zip
 
 # Python cache
 **/__pycache__/

@@ -111,7 +111,7 @@ resource "google_app_engine_application" "app" {
 
 resource "google_firestore_database" "default" {
   count       = var.manage_firestore_database ? 1 : 0
-  name        = "(default)"
+  name        = var.firestore_database_id
   project     = var.project
   location_id = var.region
   type        = "FIRESTORE_NATIVE"

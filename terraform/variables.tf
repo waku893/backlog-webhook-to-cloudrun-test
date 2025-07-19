@@ -27,6 +27,12 @@ variable "manage_firestore_database" {
   default     = false
 }
 
+variable "firestore_database_id" {
+  description = "ID of the Firestore database to create when manage_firestore_database is true"
+  type        = string
+  default     = "backlog-db"
+}
+
 variable "log_level" {
   description = "Logging level for the Cloud Function"
   type        = string

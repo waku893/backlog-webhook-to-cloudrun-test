@@ -22,7 +22,8 @@ terraform apply -var="project=<YOUR_GCP_PROJECT>"
 
 `gcf-artifacts` へのアクセス権がなく 403 エラーになる場合は、Cloud Functions のサービス エージェントに `roles/artifactregistry.reader` 権限を付与してください。Terraform では関数作成後に自動的にこの権限を付与します。
 
-既に Firestore データベースが存在する場合、`Database already exists` というエラーが出ることがあります。Terraform では `manage_firestore_database` 変数を `false` (デフォルト) にすることでデータベース作成をスキップできます。新規作成が必要な場合のみ `true` に設定してください。
+Terraform ではデフォルトで Firestore のデータベースを **作成しません**。新しくデータベースを作成したい場合は `manage_firestore_database` 変数を `true` にしてください。既にデータベースがあるプロジェクトでは `false` のままで問題ありません。
+作成するデータベース ID は `firestore_database_id` 変数で指定でき、デフォルトは `backlog-db` です。
 
 `log_level` 変数で関数のログレベルを変更できます。`DEBUG` に設定するとリクエスト内容や Firestore のエラーを詳細に記録し、`500` エラーの原因を調査しやすくなります。
 
@@ -39,4 +40,3 @@ Backlog の Webhook URL としてこの関数のエンドポイントを指定�
 `LOG_LEVEL` を `DEBUG` にすると、予期しない `500` エラーの原因を追跡するための詳細なログが出力されます。Terraform の `log_level` 変数から設定できます。
 
 Terraform の状態ファイルや `function.zip` などのビルド成果物は `.gitignore` で除外しています。不要なファイルがリポジトリに含まれないよう確認してください。
-
