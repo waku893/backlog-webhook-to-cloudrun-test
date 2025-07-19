@@ -1,11 +1,11 @@
-# Backlog Webhook to Firestore via Cloud Functions
+# Backlog Webhook to Firestore via Cloud Functions (2nd gen)
 
-This repository contains an example setup to receive Backlog webhooks with a Google Cloud Function and store the payload in Firestore. The infrastructure is provisioned using Terraform.
+This repository contains an example setup to receive Backlog webhooks with a Google Cloud Function **2nd gen** and store the payload in Firestore. The infrastructure is provisioned using Terraform.
 
 ## Structure
 
 - `function/` – Python source code for the Cloud Function.
-- `terraform/` – Terraform configuration to create the Cloud Function, Firestore database, service account and other required resources.
+- `terraform/` – Terraform configuration to create the Cloud Function (2nd gen), Firestore database, service account and other required resources.
 
 ## Deployment
 
@@ -21,10 +21,10 @@ terraform apply -var="project=<YOUR_GCP_PROJECT>"
 The default region is `asia-northeast1`. Use `-var="region=<REGION>"` to override
 it. The function URL will be printed in the outputs after apply.
 
-If Cloud Functions deployment fails with a 403 error about accessing
-`gcf-artifacts`, grant the built-in Cloud Functions service agent the
-`roles/artifactregistry.reader` role. Terraform configuration in this
-repository does this automatically.
+If deployment fails with a 403 error about accessing `gcf-artifacts`,
+grant the built‑in Cloud Functions service agent the
+`roles/artifactregistry.reader` role. The Terraform configuration
+grants this permission automatically when the function is created.
 
 If a Firestore database already exists in your project, Terraform may
 error with `Database already exists`. Database creation is disabled by

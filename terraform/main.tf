@@ -70,21 +70,37 @@ resource "google_storage_bucket_object" "function_archive" {
   source = data.archive_file.function_zip.output_path
 }
 
-resource "google_cloudfunctions_function" "function" {
-  name        = var.function_name
-  runtime     = "python39"
-  entry_point = "webhook_handler"
-  region      = var.region
+resource "google_cloudfunctions2_function" "function" {
+  name     = var.function_name
+  location = var.region
 
-  source_archive_bucket = google_storage_bucket.function_bucket.name
-  source_archive_object = google_storage_bucket_object.function_archive.name
-  service_account_email = google_service_account.function_sa.email
+  build_config {
+    runtime     = "python39"
+    entry_point = "webhook_handler"
 
-  trigger_http = true
-
-  environment_variables = {
-    FIRESTORE_COLLECTION = var.firestore_collection
+    source {
+      storage_source {
+        bucket = google_storage_bucket.function_bucket.name
+        object = google_storage_bucket_object.function_archive.name
+      }
+    }
   }
+
+  service_config {
+    service_account_email = google_service_account.function_sa.email
+    environment_variables = {
+      FIRESTORE_COLLECTION = var.firestore_collection
+    }
+  }
+}
+
+resource "google_cloudfunctions2_function_iam_member" "invoker" {
+  project       = var.project
+  region        = var.region
+  cloud_function = google_cloudfunctions2_function.function.name
+  role          = "roles/run.invoker"
+  member        = "allUsers"
+
 }
 
 resource "google_app_engine_application" "app" {
