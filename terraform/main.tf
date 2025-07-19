@@ -13,6 +13,11 @@ provider "google" {
   region  = var.region
 }
 
+# Lookup project info (number needed for service agent email)
+data "google_project" "current" {
+  project_id = var.project
+}
+
 # Enable required services
 resource "google_project_service" "cloudfunctions" {
   service = "cloudfunctions.googleapis.com"
@@ -26,15 +31,11 @@ resource "google_project_service" "cloudbuild" {
   service = "cloudbuild.googleapis.com"
 }
 
-# Cloud Functions service agent (needed for Artifact Registry access)
-data "google_project_service_identity" "cloudfunctions" {
-  service = "cloudfunctions.googleapis.com"
-}
-
+# Grant Artifact Registry read access to the Cloud Functions service agent
 resource "google_project_iam_member" "cloudfunctions_artifact_registry" {
   project = var.project
   role    = "roles/artifactregistry.reader"
-  member  = "serviceAccount:${data.google_project_service_identity.cloudfunctions.email}"
+  member  = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudfunctions.iam.gserviceaccount.com"
 }
 
 # Service account for Cloud Function
