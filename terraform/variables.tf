@@ -24,5 +24,5 @@ variable "firestore_collection" {
 variable "manage_firestore_database" {
   description = "Whether Terraform should create the Firestore database"
   type        = bool
-  default     = true
+  default     = false
 }
