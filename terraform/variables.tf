@@ -26,3 +26,9 @@ variable "manage_firestore_database" {
   type        = bool
   default     = false
 }
+
+variable "log_level" {
+  description = "Logging level for the Cloud Function"
+  type        = string
+  default     = "INFO"
+}

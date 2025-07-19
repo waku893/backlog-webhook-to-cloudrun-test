@@ -31,6 +31,10 @@ error with `Database already exists`. Database creation is disabled by
 default via the `manage_firestore_database` variable. Set it to `true`
 only when you need Terraform to create the database for you.
 
+You can adjust the function's verbosity with the `log_level` variable. When set
+to `DEBUG` the function logs request details and Firestore errors to help
+diagnose issues.
+
 This example expects **Firestore in Native mode**. If your project
 uses Datastore mode you will see an error like:
 
@@ -42,3 +46,5 @@ Firestore in Datastore Mode database
 Create a new project or switch to Native mode to use this example.
 
 Backlog can be configured to POST webhooks to this URL. Each payload will be stored in the Firestore collection defined by `FIRESTORE_COLLECTION` (defaults to `backlog_webhooks`).
+
+To troubleshoot unexpected `500` responses, set the environment variable `LOG_LEVEL` to `DEBUG` so the function emits detailed logs. The Terraform configuration exposes a `log_level` variable that controls this setting.
