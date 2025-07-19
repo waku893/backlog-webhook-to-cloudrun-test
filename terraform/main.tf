@@ -90,7 +90,7 @@ resource "google_cloudfunctions2_function" "function" {
     service_account_email = google_service_account.function_sa.email
     environment_variables = {
       FIRESTORE_COLLECTION = var.firestore_collection
-      LOG_LEVEL           = var.log_level
+      LOG_LEVEL            = var.log_level
     }
   }
 }
