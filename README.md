@@ -18,7 +18,8 @@ terraform init
 terraform apply -var="project=<YOUR_GCP_PROJECT>"
 ```
 
-The function URL will be printed in the outputs after apply.
+The default region is `asia-northeast1`. Use `-var="region=<REGION>"` to override
+it. The function URL will be printed in the outputs after apply.
 
 If Cloud Functions deployment fails with a 403 error about accessing
 `gcf-artifacts`, grant the built-in Cloud Functions service agent the
