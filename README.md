@@ -31,4 +31,14 @@ error with `Database already exists`. Database creation is disabled by
 default via the `manage_firestore_database` variable. Set it to `true`
 only when you need Terraform to create the database for you.
 
+This example expects **Firestore in Native mode**. If your project
+uses Datastore mode you will see an error like:
+
+```
+FailedPrecondition: 400 The Cloud Firestore API is not available for
+Firestore in Datastore Mode database
+```
+
+Create a new project or switch to Native mode to use this example.
+
 Backlog can be configured to POST webhooks to this URL. Each payload will be stored in the Firestore collection defined by `FIRESTORE_COLLECTION` (defaults to `backlog_webhooks`).

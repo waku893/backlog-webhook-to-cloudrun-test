@@ -1,5 +1,6 @@
 import os
 from google.cloud import firestore
+from google.api_core import exceptions
 
 collection = os.environ.get("FIRESTORE_COLLECTION", "backlog_webhooks")
 
@@ -13,5 +14,9 @@ def webhook_handler(request):
     if data is None:
         return ("Bad Request: no JSON payload", 400)
 
-    db.collection(collection).add({"payload": data})
+    try:
+        db.collection(collection).add({"payload": data})
+    except exceptions.FailedPrecondition:
+        # Raised if the project uses Firestore in Datastore mode
+        return ("Firestore in Datastore mode is not supported", 500)
     return ("OK", 200)
