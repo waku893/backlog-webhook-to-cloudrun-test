@@ -26,8 +26,8 @@ If Cloud Functions deployment fails with a 403 error about accessing
 repository does this automatically.
 
 If a Firestore database already exists in your project, Terraform may
-error with `Database already exists`. In that case you can safely
-comment out the `google_firestore_database` resource in
-`terraform/main.tf`.
+error with `Database already exists`. Set the variable
+`manage_firestore_database` to `false` to skip creation of the database
+when running `terraform apply`.
 
 Backlog can be configured to POST webhooks to this URL. Each payload will be stored in the Firestore collection defined by `FIRESTORE_COLLECTION` (defaults to `backlog_webhooks`).

@@ -33,9 +33,10 @@ resource "google_project_service" "cloudbuild" {
 
 # Grant Artifact Registry read access to the Cloud Functions service agent
 resource "google_project_iam_member" "cloudfunctions_artifact_registry" {
-  project = var.project
-  role    = "roles/artifactregistry.reader"
-  member  = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudfunctions.iam.gserviceaccount.com"
+  project    = var.project
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudfunctions.iam.gserviceaccount.com"
+  depends_on = [google_project_service.cloudfunctions]
 }
 
 # Service account for Cloud Function
@@ -92,6 +93,7 @@ resource "google_app_engine_application" "app" {
 }
 
 resource "google_firestore_database" "default" {
+  count       = var.manage_firestore_database ? 1 : 0
   name        = "(default)"
   project     = var.project
   location_id = var.region
