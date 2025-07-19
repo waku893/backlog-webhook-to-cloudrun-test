@@ -39,3 +39,4 @@ Backlog の Webhook URL としてこの関数のエンドポイントを指定�
 `LOG_LEVEL` を `DEBUG` にすると、予期しない `500` エラーの原因を追跡するための詳細なログが出力されます。Terraform の `log_level` 変数から設定できます。
 
 Terraform の状態ファイルや `function.zip` などのビルド成果物は `.gitignore` で除外しています。不要なファイルがリポジトリに含まれないよう確認してください。
+
