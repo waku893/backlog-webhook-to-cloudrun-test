@@ -75,7 +75,7 @@ resource "google_cloudfunctions2_function" "function" {
   location = var.region
 
   build_config {
-    runtime     = "python39"
+    runtime     = "python313"
     entry_point = "webhook_handler"
 
     source {

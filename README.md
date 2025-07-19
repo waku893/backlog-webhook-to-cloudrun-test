@@ -1,6 +1,6 @@
 # Backlog Webhook to Firestore via Cloud Functions (2nd gen)
 
-This repository contains an example setup to receive Backlog webhooks with a Google Cloud Function **2nd gen** and store the payload in Firestore. The infrastructure is provisioned using Terraform.
+This repository contains an example setup to receive Backlog webhooks with a Google Cloud Function **2nd gen** running on **Python 3.13** and store the payload in Firestore. The infrastructure is provisioned using Terraform.
 
 ## Structure
 
