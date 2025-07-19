@@ -35,7 +35,7 @@ resource "google_project_service" "cloudbuild" {
 resource "google_project_iam_member" "cloudfunctions_artifact_registry" {
   project    = var.project
   role       = "roles/artifactregistry.reader"
-  member     = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-cloudfunctions.iam.gserviceaccount.com"
+  member     = "serviceAccount:service-${data.google_project.current.number}@gcf-admin-robot.iam.gserviceaccount.com"
   depends_on = [google_project_service.cloudfunctions]
 }
 
