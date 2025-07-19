@@ -1,0 +1,11 @@
+# Terraform artifacts
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/function.zip
+terraform.tfstate
+
+# Python cache
+**/__pycache__/
+
