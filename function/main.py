@@ -8,7 +8,8 @@ collection = os.environ.get("FIRESTORE_COLLECTION", "backlog_webhooks")
 log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 
-db = firestore.Client()
+project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
+db = firestore.Client(project=project_id)
 ds = datastore.Client()
 
 def webhook_handler(request):
@@ -23,8 +24,10 @@ def webhook_handler(request):
         return ("Bad Request: no JSON payload", 400)
 
     try:
-        doc_ref = db.collection(collection).add({"payload": data})
-        logging.debug("Stored document: %s", doc_ref[1].id)
+        update_time, doc_ref = db.collection(collection).add({"payload": data})
+        logging.info(
+            "Stored document %s at %s", doc_ref.id, update_time.isoformat()
+        )
     except exceptions.FailedPrecondition:
         # Firestore is in Datastore mode. Use Datastore client instead.
         logging.warning("Firestore in Datastore mode; using Datastore client")
@@ -34,10 +37,10 @@ def webhook_handler(request):
             entity.update({"payload": data})
             ds.put(entity)
             logging.debug("Stored Datastore entity: %s", entity.key.id_or_name)
-        except Exception:
-            logging.exception("Failed to store payload in Datastore")
+        except Exception as e:
+            logging.exception("Failed to store payload in Datastore: %s", e)
             return ("Internal Server Error", 500)
-    except Exception:
-        logging.exception("Failed to store payload")
+    except Exception as e:
+        logging.exception("Failed to store payload: %s", e)
         return ("Internal Server Error", 500)
     return ("OK", 200)

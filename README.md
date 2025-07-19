@@ -37,6 +37,6 @@ Firestore in Datastore mode; using Datastore client
 
 Backlog の Webhook URL としてこの関数のエンドポイントを指定すると、受け取った JSON ペイロードが `FIRESTORE_COLLECTION` (デフォルトは `backlog_webhooks`) に保存されます。
 
-`LOG_LEVEL` を `DEBUG` にすると、予期しない `500` エラーの原因を追跡するための詳細なログが出力されます。Terraform の `log_level` 変数から設定できます。
+`LOG_LEVEL` を `DEBUG` にすると、予期しない `500` エラーの原因を追跡するための詳細なログが出力されます。Terraform の `log_level` 変数から設定できます。成功時は INFO レベルでドキュメント ID と書き込み時刻をログに記録するため、Firestore への保存が確認できます。
 
 Terraform の状態ファイルや `function.zip` などのビルド成果物は `.gitignore` で除外しています。不要なファイルがリポジトリに含まれないよう確認してください。
