@@ -95,12 +95,11 @@ resource "google_cloudfunctions2_function" "function" {
 }
 
 resource "google_cloudfunctions2_function_iam_member" "invoker" {
-  project       = var.project
-  region        = var.region
+  project        = var.project
+  location       = var.region
   cloud_function = google_cloudfunctions2_function.function.name
-  role          = "roles/run.invoker"
-  member        = "allUsers"
-
+  role           = "roles/run.invoker"
+  member         = "allUsers"
 }
 
 resource "google_app_engine_application" "app" {
