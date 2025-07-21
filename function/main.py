@@ -97,6 +97,8 @@ def store_issue(root, issue):
     doc = {
         "issue_id": issue_id,
         "project_id": root.get("project", {}).get("id"),
+        "project_key": root.get("project", {}).get("projectKey"),
+        "issue_key": f"{root.get('project', {}).get('projectKey')}-{issue.get('key_id')}" if issue.get("key_id") else None,
         "title": issue.get("summary"),
         "status_id": issue.get("status", {}).get("id"),
         "status": issue.get("status", {}).get("name"),
@@ -121,9 +123,12 @@ def store_comment(root, content):
     """Save issue comment details."""
     comment = content.get("comment", {})
     comment_id = str(comment.get("id"))
+    issue_key = None
+    if content.get("key_id") is not None:
+        issue_key = f"{root.get('project', {}).get('projectKey')}-{content.get('key_id')}"
     doc = {
         "comment_id": comment_id,
-        "issue_key": content.get("key_id"),
+        "issue_key": issue_key,
         "author_id": root.get("createdUser", {}).get("id"),
         "author_name": root.get("createdUser", {}).get("name"),
         "content": comment.get("content"),
