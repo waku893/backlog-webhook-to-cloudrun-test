@@ -23,8 +23,8 @@ resource "google_project_service" "cloudfunctions" {
   service = "cloudfunctions.googleapis.com"
 }
 
-resource "google_project_service" "datastore" {
-  service = "datastore.googleapis.com"
+resource "google_project_service" "firestore" {
+  service = "firestore.googleapis.com"
 }
 
 resource "google_project_service" "cloudbuild" {
@@ -45,7 +45,7 @@ resource "google_service_account" "function_sa" {
   display_name = "Cloud Function SA"
 }
 
-resource "google_project_iam_member" "datastore_access" {
+resource "google_project_iam_member" "firestore_access" {
   project = var.project
   role    = "roles/datastore.user"
   member  = "serviceAccount:${google_service_account.function_sa.email}"
@@ -158,8 +158,12 @@ resource "google_cloud_run_service_iam_member" "invoker" {
   depends_on = [google_cloudfunctions2_function.function]
 }
 
-resource "google_app_engine_application" "app" {
+resource "google_firestore_database" "default" {
+  count       = var.manage_firestore_database ? 1 : 0
   project     = var.project
+  name        = "(default)"
   location_id = var.region
+  type        = "FIRESTORE_NATIVE"
+  depends_on  = [google_project_service.firestore]
 }
 

@@ -2,7 +2,7 @@ import os
 import json
 import base64
 import logging
-from google.cloud import datastore
+from google.cloud import firestore
 from google.cloud import pubsub_v1
 
 # Logging setup
@@ -13,8 +13,8 @@ USE_PUBSUB = os.environ.get("USE_PUBSUB", "false").lower() == "true"
 PUBSUB_TOPIC = os.environ.get("PUBSUB_TOPIC", "backlog-webhook")
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
 
-# Datastore client
-ds = datastore.Client(project=PROJECT_ID)
+# Firestore client
+db = firestore.Client(project=PROJECT_ID)
 
 # Pub/Sub client only when needed
 publisher = pubsub_v1.PublisherClient() if USE_PUBSUB else None
@@ -84,36 +84,25 @@ def process_event(data):
 
 def store_issue(issue):
     issue_id = str(issue.get("issue_id") or issue.get("id"))
-    key = ds.key("backlog-issue", issue_id)
-    entity = datastore.Entity(key=key)
-    entity.update(issue)
-    ds.put(entity)
+    db.collection("backlog-issue").document(issue_id).set(issue)
     logging.info("Stored/updated issue %s", issue_id)
 
 def delete_issue(issue):
     issue_id = str(issue.get("issue_id") or issue.get("id"))
-    key = ds.key("backlog-issue", issue_id)
-    ds.delete(key)
+    db.collection("backlog-issue").document(issue_id).delete()
     logging.info("Deleted issue %s", issue_id)
 
 def store_comment(comment):
     comment_id = str(comment.get("key") or comment.get("comment_id") or comment.get("id"))
-    key = ds.key("backlog-comment", comment_id)
-    entity = datastore.Entity(key=key)
-    entity.update(comment)
-    ds.put(entity)
+    db.collection("backlog-comment").document(comment_id).set(comment)
     logging.info("Stored/updated comment %s", comment_id)
 
 def delete_comment(comment):
     comment_id = str(comment.get("key") or comment.get("comment_id") or comment.get("id"))
-    key = ds.key("backlog-comment", comment_id)
-    ds.delete(key)
+    db.collection("backlog-comment").document(comment_id).delete()
     logging.info("Deleted comment %s", comment_id)
 
 def store_comment_notif(notif):
     notif_id = str(notif.get("notification_id") or notif.get("id"))
-    key = ds.key("backlog-comment-notif", notif_id)
-    entity = datastore.Entity(key=key)
-    entity.update(notif)
-    ds.put(entity)
+    db.collection("backlog-comment-notif").document(notif_id).set(notif)
     logging.info("Stored/updated notification %s", notif_id)

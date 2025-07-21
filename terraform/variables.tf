@@ -32,3 +32,9 @@ variable "log_level" {
   type        = string
   default     = "INFO"
 }
+
+variable "manage_firestore_database" {
+  description = "Create Firestore database if true"
+  type        = bool
+  default     = true
+}
