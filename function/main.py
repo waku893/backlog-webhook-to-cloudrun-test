@@ -137,20 +137,17 @@ def store_bulk_update(root, content):
             new_name = None
         if field == "status":
             update_doc["status_id"] = new_id
-            if new_name is not None:
-                update_doc["status"] = new_name
+            update_doc["status"] = new_name
         elif field == "resolution":
             update_doc["resolution_id"] = new_id
-            if new_name is not None:
-                update_doc["resolution"] = new_name
+            update_doc["resolution"] = new_name
         elif field == "assignee":
             update_doc["assignee_id"] = new_id
-            if new_name is not None:
-                update_doc["assignee_name"] = new_name
+            update_doc["assignee_name"] = new_name
         elif field == "priority":
             update_doc["priority_id"] = new_id
-            if new_name is not None:
-                update_doc["priority_name"] = new_name
+            update_doc["priority_name"] = new_name
+
     update_doc["updated_at"] = root.get("created")
 
     for link in content.get("link", []):
@@ -188,8 +185,6 @@ def store_comment(root, content):
         "project_name": root.get("project", {}).get("name"),
         "author_id": root.get("createdUser", {}).get("id"),
         "author_name": root.get("createdUser", {}).get("name"),
-        "status_id": content.get("status", {}).get("id"),
-        "status": content.get("status", {}).get("name"),
         "content": comment.get("content"),
         "created_at": root.get("created"),
     }
