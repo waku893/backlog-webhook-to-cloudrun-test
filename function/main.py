@@ -84,8 +84,14 @@ def process_event(data):
     content = data.get("content", {})
     logging.debug("Processing event %s", event_type)
 
-    if str(event_type) in ("1", "2"):
+    if str(event_type) == "1":
         store_issue(data, content)
+    elif str(event_type) == "2":
+        store_issue(data, content)
+        if content.get("comment"):
+            store_comment(data, content)
+            if data.get("notifications"):
+                store_comment_notif(data, content)
     elif str(event_type) == "14":
         store_bulk_update(data, content)
     elif str(event_type) == "4":
@@ -147,7 +153,6 @@ def store_bulk_update(root, content):
         elif field == "priority":
             update_doc["priority_id"] = new_id
             update_doc["priority_name"] = new_name
-
     update_doc["updated_at"] = root.get("created")
 
     for link in content.get("link", []):
@@ -185,6 +190,8 @@ def store_comment(root, content):
         "project_name": root.get("project", {}).get("name"),
         "author_id": root.get("createdUser", {}).get("id"),
         "author_name": root.get("createdUser", {}).get("name"),
+        "status_id": content.get("status", {}).get("id"),
+        "status": content.get("status", {}).get("name"),
         "content": comment.get("content"),
         "created_at": root.get("created"),
     }
