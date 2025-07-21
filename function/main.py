@@ -161,18 +161,6 @@ def store_bulk_update(root, content):
             "title": link.get("title") or link.get("summary"),
         }
         doc.update(update_doc)
-
-        # If the payload omitted the status name, retain the existing one
-        if "status_id" in update_doc and update_doc.get("status") is None:
-            existing = db.collection("backlog-issue").document(issue_id).get()
-            if existing.exists:
-                existing_status = existing.to_dict().get("status")
-                if existing_status is not None:
-                    doc["status"] = existing_status
-                else:
-                    doc.pop("status", None)
-            else:
-                doc.pop("status", None)
         db.collection("backlog-issue").document(issue_id).set(doc, merge=True)
         logging.info("Processed bulk update for issue %s", issue_id)
 
@@ -191,6 +179,9 @@ def store_comment(root, content):
     doc = {
         "comment_id": comment_id,
         "issue_key": issue_key,
+        "project_id": root.get("project", {}).get("id"),
+        "project_key": root.get("project", {}).get("projectKey"),
+        "project_name": root.get("project", {}).get("name"),
         "author_id": root.get("createdUser", {}).get("id"),
         "author_name": root.get("createdUser", {}).get("name"),
         "content": comment.get("content"),
@@ -212,6 +203,9 @@ def store_comment_notif(root, content):
         doc = {
             "comment_id": comment_id,
             "notification_id": notif_id,
+            "project_id": root.get("project", {}).get("id"),
+            "project_key": root.get("project", {}).get("projectKey"),
+            "project_name": root.get("project", {}).get("name"),
             "user_id": notif.get("user", {}).get("id"),
             "user_name": notif.get("user", {}).get("name"),
             "already_read": notif.get("alreadyRead"),

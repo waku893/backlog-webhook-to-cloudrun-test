@@ -39,15 +39,13 @@ Webhook 受信関数は JSON ペイロードを受け取り、`USE_PUBSUB` 環�
 | 14  | 課題をまとめて更新         |
 | 17  | コメントにお知らせを追加   |
 
-まとめて更新 (type 14) では、新しいステータス ID だけが送られる場合があります。そのときは既存ドキュメントから `status` 名を取得し、保持したまま更新します。
-
 Firestore では次の 3 つのコレクションを利用します。
 
 - `backlog-issue`
 - `backlog-comment`
 - `backlog-comment-notif`
 
-イベントタイプ (課題追加・更新・コメント・削除など) に応じてそれぞれのコレクションへデータを追加・更新・削除します。各コレクションでは主なフィールドを抜き出して保存しており、例えば `backlog-issue` では課題 ID やステータス、担当者に加えて `projectKey` と `issueKey` も文字列として保存します。`backlog-comment` ではコメント ID・発言者・本文などを格納します。
+イベントタイプ (課題追加・更新・コメント・削除など) に応じてそれぞれのコレクションへデータを追加・更新・削除します。各コレクションでは主なフィールドを抜き出して保存しており、例えば `backlog-issue` では課題 ID やステータス、担当者に加えて `projectKey` と `issueKey` も文字列として保存します。`backlog-comment` と `backlog-comment-notif` でも `projectKey` と `projectName` を含め、コメント ID・発言者・本文や通知先ユーザー情報を保存します。
 
 Terraform ではデフォルトで必要な API を有効化し、Cloud Function 用のサービスアカウントと Pub/Sub トピック (必要な場合) を作成します。Artifact Registry へのアクセス権も自動で付与されます。
 
