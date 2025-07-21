@@ -4,6 +4,7 @@ import base64
 import logging
 from google.cloud import firestore
 from google.cloud import pubsub_v1
+from google.api_core import exceptions as gexc
 import google.auth
 
 # Logging setup
@@ -60,6 +61,9 @@ def webhook_handler(request):
         try:
             process_event(data)
             return ("OK", 200)
+        except gexc.FailedPrecondition as e:
+            logging.error("Firestore in Datastore mode: %s", e)
+            return ("Firestore in Datastore mode", 503)
         except Exception as e:
             logging.exception("Failed to process event: %s", e)
             return ("Internal Server Error", 500)
@@ -80,7 +84,6 @@ def process_event(data):
     content = data.get("content", {})
     logging.debug("Processing event %s", event_type)
 
-    # type "14" is a bulk update event containing multiple issues
     if str(event_type) in ("1", "2"):
         store_issue(data, content)
     elif str(event_type) == "14":
@@ -124,18 +127,26 @@ def store_bulk_update(root, content):
     for change in changes:
         field = change.get("field")
         new = change.get("new_value")
+        # new_value may be an object or a simple value
+        if isinstance(new, dict):
+            new_id = new.get("id")
+            new_name = new.get("name")
+        else:
+            # when only ID is provided, map to id field
+            new_id = new
+            new_name = None
         if field == "status":
-            update_doc["status_id"] = (new or {}).get("id")
-            update_doc["status"] = (new or {}).get("name")
+            update_doc["status_id"] = new_id
+            update_doc["status"] = new_name
         elif field == "resolution":
-            update_doc["resolution_id"] = (new or {}).get("id")
-            update_doc["resolution"] = (new or {}).get("name")
+            update_doc["resolution_id"] = new_id
+            update_doc["resolution"] = new_name
         elif field == "assignee":
-            update_doc["assignee_id"] = (new or {}).get("id")
-            update_doc["assignee_name"] = (new or {}).get("name")
+            update_doc["assignee_id"] = new_id
+            update_doc["assignee_name"] = new_name
         elif field == "priority":
-            update_doc["priority_id"] = (new or {}).get("id")
-            update_doc["priority_name"] = (new or {}).get("name")
+            update_doc["priority_id"] = new_id
+            update_doc["priority_name"] = new_name
     update_doc["updated_at"] = root.get("created")
 
     for link in content.get("link", []):

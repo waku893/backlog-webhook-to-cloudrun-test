@@ -39,10 +39,6 @@ Webhook 受信関数は JSON ペイロードを受け取り、`USE_PUBSUB` 環�
 | 14  | 課題をまとめて更新         |
 | 17  | コメントにお知らせを追加   |
 
-イベントタイプ14では `content.link` に複数の課題が含まれます。`changes` の内容を
-各課題へ適用し、`backlog-issue` コレクションの既存ドキュメントを `merge=True` で
-更新します。
-
 Firestore では次の 3 つのコレクションを利用します。
 
 - `backlog-issue`
@@ -50,6 +46,12 @@ Firestore では次の 3 つのコレクションを利用します。
 - `backlog-comment-notif`
 
 イベントタイプ (課題追加・更新・コメント・削除など) に応じてそれぞれのコレクションへデータを追加・更新・削除します。各コレクションでは主なフィールドを抜き出して保存しており、例えば `backlog-issue` では課題 ID やステータス、担当者に加えて `projectKey` と `issueKey` も文字列として保存します。`backlog-comment` ではコメント ID・発言者・本文などを格納します。
+
 Terraform ではデフォルトで必要な API を有効化し、Cloud Function 用のサービスアカウントと Pub/Sub トピック (必要な場合) を作成します。Artifact Registry へのアクセス権も自動で付与されます。
 
 `.gitignore` には Terraform の状態ファイルや `function.zip` などの生成物を除外する設定が含まれています。
+
+## 注意点
+
+このサンプルは **Firestore ネイティブモード** を前提としています。プロジェクトのデータベースが Datastore モードの場合、Cloud Function は `Firestore in Datastore mode` というメッセージと共に HTTP 503 を返します。ネイティブモードのデータベースを作成してからご利用ください。
+
