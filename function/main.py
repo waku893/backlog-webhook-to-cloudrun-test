@@ -80,8 +80,11 @@ def process_event(data):
     content = data.get("content", {})
     logging.debug("Processing event %s", event_type)
 
-    if str(event_type) in ("1", "2", "14"):
+    # type "14" is a bulk update event containing multiple issues
+    if str(event_type) in ("1", "2"):
         store_issue(data, content)
+    elif str(event_type) == "14":
+        store_bulk_update(data, content)
     elif str(event_type) == "4":
         delete_issue(content)
     elif str(event_type) == "3":
@@ -113,6 +116,42 @@ def store_issue(root, issue):
     }
     db.collection("backlog-issue").document(issue_id).set(doc)
     logging.info("Stored/updated issue %s", issue_id)
+
+def store_bulk_update(root, content):
+    """Update multiple issues based on bulk update payload."""
+    changes = content.get("changes", [])
+    update_doc = {}
+    for change in changes:
+        field = change.get("field")
+        new = change.get("new_value")
+        if field == "status":
+            update_doc["status_id"] = (new or {}).get("id")
+            update_doc["status"] = (new or {}).get("name")
+        elif field == "resolution":
+            update_doc["resolution_id"] = (new or {}).get("id")
+            update_doc["resolution"] = (new or {}).get("name")
+        elif field == "assignee":
+            update_doc["assignee_id"] = (new or {}).get("id")
+            update_doc["assignee_name"] = (new or {}).get("name")
+        elif field == "priority":
+            update_doc["priority_id"] = (new or {}).get("id")
+            update_doc["priority_name"] = (new or {}).get("name")
+    update_doc["updated_at"] = root.get("created")
+
+    for link in content.get("link", []):
+        issue_id = str(link.get("id"))
+        doc = {
+            "issue_id": issue_id,
+            "issue_key": (
+                f"{root.get('project', {}).get('projectKey')}-{link.get('key_id')}"
+                if link.get("key_id") is not None
+                else None
+            ),
+            "title": link.get("title") or link.get("summary"),
+        }
+        doc.update(update_doc)
+        db.collection("backlog-issue").document(issue_id).set(doc, merge=True)
+        logging.info("Processed bulk update for issue %s", issue_id)
 
 def delete_issue(issue):
     issue_id = str(issue.get("issue_id") or issue.get("id"))

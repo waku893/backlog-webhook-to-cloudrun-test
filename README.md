@@ -39,6 +39,10 @@ Webhook 受信関数は JSON ペイロードを受け取り、`USE_PUBSUB` 環�
 | 14  | 課題をまとめて更新         |
 | 17  | コメントにお知らせを追加   |
 
+イベントタイプ14では `content.link` に複数の課題が含まれます。`changes` の内容を
+各課題へ適用し、`backlog-issue` コレクションの既存ドキュメントを `merge=True` で
+更新します。
+
 Firestore では次の 3 つのコレクションを利用します。
 
 - `backlog-issue`
