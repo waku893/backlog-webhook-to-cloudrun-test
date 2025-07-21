@@ -77,6 +77,7 @@ def process_event(data):
     elif str(event_type) == "3":
         store_comment(content)
     elif str(event_type) == "17":
+
         store_comment_notif(content)
     else:
         logging.warning("Unknown event type: %s", event_type)
