@@ -81,19 +81,35 @@ def process_event(data):
     logging.debug("Processing event %s", event_type)
 
     if str(event_type) in ("1", "2", "14"):
-        store_issue(content)
+        store_issue(data, content)
     elif str(event_type) == "4":
         delete_issue(content)
     elif str(event_type) == "3":
-        store_comment(content)
+        store_comment(data, content)
     elif str(event_type) == "17":
-        store_comment_notif(content)
+        store_comment_notif(data, content)
     else:
         logging.warning("Unknown event type: %s", event_type)
 
-def store_issue(issue):
-    issue_id = str(issue.get("issue_id") or issue.get("id"))
-    db.collection("backlog-issue").document(issue_id).set(issue)
+def store_issue(root, issue):
+    """Save issue fields to Firestore."""
+    issue_id = str(issue.get("id"))
+    doc = {
+        "issue_id": issue_id,
+        "project_id": root.get("project", {}).get("id"),
+        "title": issue.get("summary"),
+        "status_id": issue.get("status", {}).get("id"),
+        "status": issue.get("status", {}).get("name"),
+        "assignee_id": (issue.get("assignee") or {}).get("id"),
+        "assignee_name": (issue.get("assignee") or {}).get("name"),
+        "issue_type_id": issue.get("issueType", {}).get("id"),
+        "issue_type_name": issue.get("issueType", {}).get("name"),
+        "priority_id": issue.get("priority", {}).get("id"),
+        "priority_name": issue.get("priority", {}).get("name"),
+        "description": issue.get("description"),
+        "created_at": root.get("created"),
+    }
+    db.collection("backlog-issue").document(issue_id).set(doc)
     logging.info("Stored/updated issue %s", issue_id)
 
 def delete_issue(issue):
@@ -101,9 +117,19 @@ def delete_issue(issue):
     db.collection("backlog-issue").document(issue_id).delete()
     logging.info("Deleted issue %s", issue_id)
 
-def store_comment(comment):
-    comment_id = str(comment.get("key") or comment.get("comment_id") or comment.get("id"))
-    db.collection("backlog-comment").document(comment_id).set(comment)
+def store_comment(root, content):
+    """Save issue comment details."""
+    comment = content.get("comment", {})
+    comment_id = str(comment.get("id"))
+    doc = {
+        "comment_id": comment_id,
+        "issue_key": content.get("key_id"),
+        "author_id": root.get("createdUser", {}).get("id"),
+        "author_name": root.get("createdUser", {}).get("name"),
+        "content": comment.get("content"),
+        "created_at": root.get("created"),
+    }
+    db.collection("backlog-comment").document(comment_id).set(doc)
     logging.info("Stored/updated comment %s", comment_id)
 
 def delete_comment(comment):
@@ -111,7 +137,20 @@ def delete_comment(comment):
     db.collection("backlog-comment").document(comment_id).delete()
     logging.info("Deleted comment %s", comment_id)
 
-def store_comment_notif(notif):
-    notif_id = str(notif.get("notification_id") or notif.get("id"))
-    db.collection("backlog-comment-notif").document(notif_id).set(notif)
-    logging.info("Stored/updated notification %s", notif_id)
+def store_comment_notif(root, content):
+    """Save notification entries."""
+    comment_id = (content.get("comment") or {}).get("id")
+    for notif in root.get("notifications", []):
+        notif_id = str(notif.get("id"))
+        doc = {
+            "comment_id": comment_id,
+            "notification_id": notif_id,
+            "user_id": notif.get("user", {}).get("id"),
+            "user_name": notif.get("user", {}).get("name"),
+            "already_read": notif.get("alreadyRead"),
+            "resource_already_read": notif.get("resourceAlreadyRead"),
+            "reason": notif.get("reason"),
+            "notified_at": root.get("created"),
+        }
+        db.collection("backlog-comment-notif").document(notif_id).set(doc)
+        logging.info("Stored/updated notification %s", notif_id)
