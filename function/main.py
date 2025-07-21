@@ -4,6 +4,7 @@ import base64
 import logging
 from google.cloud import firestore
 from google.cloud import pubsub_v1
+import google.auth
 
 # Logging setup
 log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
@@ -11,7 +12,16 @@ logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 
 USE_PUBSUB = os.environ.get("USE_PUBSUB", "false").lower() == "true"
 PUBSUB_TOPIC = os.environ.get("PUBSUB_TOPIC", "backlog-webhook")
-PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
+try:
+    _, default_project = google.auth.default()
+except Exception:
+    default_project = None
+PROJECT_ID = (
+    os.environ.get("PROJECT_ID")
+    or os.environ.get("GOOGLE_CLOUD_PROJECT")
+    or os.environ.get("GCP_PROJECT")
+    or default_project
+)
 FIRESTORE_DATABASE = os.environ.get("FIRESTORE_DATABASE", "(default)")
 
 # Firestore client
@@ -77,7 +87,6 @@ def process_event(data):
     elif str(event_type) == "3":
         store_comment(content)
     elif str(event_type) == "17":
-
         store_comment_notif(content)
     else:
         logging.warning("Unknown event type: %s", event_type)

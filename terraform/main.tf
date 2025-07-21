@@ -113,6 +113,7 @@ resource "google_cloudfunctions2_function" "function" {
       USE_PUBSUB         = tostring(var.use_pubsub)
       PUBSUB_TOPIC       = var.pubsub_topic
       FIRESTORE_DATABASE = var.firestore_database_id
+      PROJECT_ID         = var.project
     }
   }
 }
@@ -141,6 +142,7 @@ resource "google_cloudfunctions2_function" "processor" {
       USE_PUBSUB         = tostring(var.use_pubsub)
       PUBSUB_TOPIC       = var.pubsub_topic
       FIRESTORE_DATABASE = var.firestore_database_id
+      PROJECT_ID         = var.project
     }
   }
 
@@ -167,13 +169,4 @@ resource "google_firestore_database" "default" {
   location_id = var.region
   type        = "FIRESTORE_NATIVE"
   depends_on  = [google_project_service.firestore]
-}
-
-
-resource "google_project_service" "datastore" {
-  service = "datastore.googleapis.com"
-
-  lifecycle {
-    ignore_changes = [disable_on_destroy]
-  }
 }
