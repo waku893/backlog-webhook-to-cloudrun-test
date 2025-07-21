@@ -109,9 +109,10 @@ resource "google_cloudfunctions2_function" "function" {
   service_config {
     service_account_email = google_service_account.function_sa.email
     environment_variables = {
-      LOG_LEVEL    = var.log_level
-      USE_PUBSUB   = tostring(var.use_pubsub)
-      PUBSUB_TOPIC = var.pubsub_topic
+      LOG_LEVEL          = var.log_level
+      USE_PUBSUB         = tostring(var.use_pubsub)
+      PUBSUB_TOPIC       = var.pubsub_topic
+      FIRESTORE_DATABASE = var.firestore_database_id
     }
   }
 }
@@ -136,9 +137,10 @@ resource "google_cloudfunctions2_function" "processor" {
   service_config {
     service_account_email = google_service_account.function_sa.email
     environment_variables = {
-      LOG_LEVEL    = var.log_level
-      USE_PUBSUB   = tostring(var.use_pubsub)
-      PUBSUB_TOPIC = var.pubsub_topic
+      LOG_LEVEL          = var.log_level
+      USE_PUBSUB         = tostring(var.use_pubsub)
+      PUBSUB_TOPIC       = var.pubsub_topic
+      FIRESTORE_DATABASE = var.firestore_database_id
     }
   }
 
@@ -161,9 +163,8 @@ resource "google_cloud_run_service_iam_member" "invoker" {
 resource "google_firestore_database" "default" {
   count       = var.manage_firestore_database ? 1 : 0
   project     = var.project
-  name        = "(default)"
+  name        = var.firestore_database_id
   location_id = var.region
   type        = "FIRESTORE_NATIVE"
   depends_on  = [google_project_service.firestore]
 }
-

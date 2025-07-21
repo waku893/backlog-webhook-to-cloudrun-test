@@ -20,6 +20,7 @@ terraform apply -var="project=<YOUR_GCP_PROJECT>"
 
 デフォルトのリージョンは `asia-northeast1` です。別のリージョンを使う場合は `-var="region=<REGION>"` を指定してください。`use_pubsub=true` を渡すと Pub/Sub 経由で処理されます。
 Firestore データベースを自動作成したい場合は `-var="manage_firestore_database=true"` を、すでに存在する場合は `false` を指定してください。
+Firestore のデータベース名は `firestore_database_id` 変数で変更でき、Cloud Function には `FIRESTORE_DATABASE` 環境変数として渡されます。
 
 関数の URL が出力されるので、Backlog の Webhook 先として設定してください。`log_level` を `DEBUG` にすると詳細なログが得られます。
 
@@ -27,6 +28,16 @@ Firestore データベースを自動作成したい場合は `-var="manage_fire
 
 Webhook 受信関数は JSON ペイロードを受け取り、`USE_PUBSUB` 環境変数が `true` の場合は Pub/Sub トピックへメッセージを publish します。`false` の場合はそのまま Firestore へ保存します。Pub/Sub を使用する場合は、`pubsub_handler` 関数がメッセージを購読して Firestore への書き込みを行います。
 イベントタイプは [Backlog API の "最近の更新情報" ドキュメント](https://developer.nulab.com/ja/docs/backlog/api/2/get-recent-updates/) を参照しています。
+主な数値は次の通りです。
+
+| 値  | 内容                       |
+|-----|----------------------------|
+| 1   | 課題の追加                 |
+| 2   | 課題の更新                 |
+| 3   | 課題にコメント             |
+| 4   | 課題の削除                 |
+| 14  | 課題をまとめて更新         |
+| 17  | コメントにお知らせを追加   |
 
 Firestore では次の 3 つのコレクションを利用します。
 

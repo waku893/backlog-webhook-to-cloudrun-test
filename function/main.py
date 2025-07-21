@@ -12,9 +12,10 @@ logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 USE_PUBSUB = os.environ.get("USE_PUBSUB", "false").lower() == "true"
 PUBSUB_TOPIC = os.environ.get("PUBSUB_TOPIC", "backlog-webhook")
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT")
+FIRESTORE_DATABASE = os.environ.get("FIRESTORE_DATABASE", "(default)")
 
 # Firestore client
-db = firestore.Client(project=PROJECT_ID)
+db = firestore.Client(project=PROJECT_ID, database=FIRESTORE_DATABASE)
 
 # Pub/Sub client only when needed
 publisher = pubsub_v1.PublisherClient() if USE_PUBSUB else None
@@ -69,15 +70,14 @@ def process_event(data):
     content = data.get("content", {})
     logging.debug("Processing event %s", event_type)
 
-    if event_type in ("issue_created", "issue_updated"):
+    if str(event_type) in ("1", "2", "14"):
         store_issue(content)
-    elif event_type == "issue_deleted":
+    elif str(event_type) == "4":
         delete_issue(content)
-    elif event_type == "comment_created":
+    elif str(event_type) == "3":
         store_comment(content)
-    elif event_type == "comment_deleted":
-        delete_comment(content)
-    elif event_type == "comment_notification":
+    elif str(event_type) == "17":
+
         store_comment_notif(content)
     else:
         logging.warning("Unknown event type: %s", event_type)

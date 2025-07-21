@@ -38,3 +38,9 @@ variable "manage_firestore_database" {
   type        = bool
   default     = true
 }
+
+variable "firestore_database_id" {
+  description = "Firestore database ID"
+  type        = string
+  default     = "backlog-db"
+}
