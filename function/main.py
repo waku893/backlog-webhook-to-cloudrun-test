@@ -147,6 +147,7 @@ def store_bulk_update(root, content):
         elif field == "priority":
             update_doc["priority_id"] = new_id
             update_doc["priority_name"] = new_name
+
     update_doc["updated_at"] = root.get("created")
 
     for link in content.get("link", []):
