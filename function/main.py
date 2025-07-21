@@ -161,6 +161,18 @@ def store_bulk_update(root, content):
             "title": link.get("title") or link.get("summary"),
         }
         doc.update(update_doc)
+
+        # If the payload omitted the status name, retain the existing one
+        if "status_id" in update_doc and update_doc.get("status") is None:
+            existing = db.collection("backlog-issue").document(issue_id).get()
+            if existing.exists:
+                existing_status = existing.to_dict().get("status")
+                if existing_status is not None:
+                    doc["status"] = existing_status
+                else:
+                    doc.pop("status", None)
+            else:
+                doc.pop("status", None)
         db.collection("backlog-issue").document(issue_id).set(doc, merge=True)
         logging.info("Processed bulk update for issue %s", issue_id)
 
