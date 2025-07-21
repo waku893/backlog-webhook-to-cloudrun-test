@@ -1,11 +1,11 @@
-# Cloud Functions (第2世代) で Backlog の Webhook を Firestore に保存する例
+# Cloud Functions (第2世代) で Backlog Webhook を Datastore に保存する例
 
-このリポジトリは、Backlog から送られる Webhook を Google Cloud Functions **第2世代** (Python 3.13) で受け取り、Firestore に保存するサンプルです。Firestore が Datastore モードの場合は自動的に Datastore API に切り替えて保存します。インフラは Terraform で構築します。
+このリポジトリは、Backlog から送られる Webhook を Google Cloud Functions **第2世代** (Python 3.13) で受け取り、Datastore に保存するサンプルです。オプションで Pub/Sub を利用して非同期処理に切り替えることもできます。インフラは Terraform で構築します。
 
 ## 構成
 
-- `function/` – Cloud Function の Python ソースコード
-- `terraform/` – Cloud Function (第2世代) や Firestore、サービスアカウントなどを作成する Terraform 設定
+- `function/` – Cloud Functions の Python コード
+- `terraform/` – GCP リソースを作成する Terraform 設定
 
 ## デプロイ手順
 
@@ -18,25 +18,22 @@ terraform init
 terraform apply -var="project=<YOUR_GCP_PROJECT>"
 ```
 
-デフォルトのリージョンは `asia-northeast1` です。別のリージョンを使う場合は `-var="region=<REGION>"` を指定してください。適用後、関数の URL が出力されます。
+デフォルトのリージョンは `asia-northeast1` です。別のリージョンを使う場合は `-var="region=<REGION>"` を指定してください。`use_pubsub=true` を渡すと Pub/Sub 経由で処理されます。
 
-`gcf-artifacts` へのアクセス権がなく 403 エラーになる場合は、Cloud Functions のサービス エージェントに `roles/artifactregistry.reader` 権限を付与してください。Terraform では関数作成後に自動的にこの権限を付与します。
+関数の URL が出力されるので、Backlog の Webhook 先として設定してください。`log_level` を `DEBUG` にすると詳細なログが得られます。
 
-Terraform ではデフォルトで Firestore のデータベースを **作成しません**。新しくデータベースを作成したい場合は `manage_firestore_database` 変数を `true` にしてください。既にデータベースがあるプロジェクトでは `false` のままで問題ありません。
-作成するデータベース ID は `firestore_database_id` 変数で指定でき、デフォルトは `backlog-db` です。
+## 処理概要
 
-`log_level` 変数で関数のログレベルを変更できます。`DEBUG` に設定するとリクエスト内容や Firestore のエラーを詳細に記録し、`500` エラーの原因を調査しやすくなります。
+Webhook 受信関数は JSON ペイロードを受け取り、`USE_PUBSUB` 環境変数が `true` の場合は Pub/Sub トピックへメッセージを publish します。`false` の場合はそのまま Datastore へ保存します。Pub/Sub を使用する場合は、`pubsub_handler` 関数がメッセージを購読して Datastore への書き込みを行います。
 
-プロジェクトが **Firestore の Datastore モード** を使用している場合、関数は自動的に Datastore API に切り替えます。ログには次のように表示されます。
+Datastore では次の 3 つの Kind を利用します。
 
-```
-Firestore in Datastore mode; using Datastore client
-```
+- `backlog-issue`
+- `backlog-comment`
+- `backlog-comment-notif`
 
-この場合もデータは Datastore に保存されます。
+イベントタイプ (課題追加・更新・コメント・削除など) に応じてそれぞれの Kind へデータを追加・更新・削除します。
 
-Backlog の Webhook URL としてこの関数のエンドポイントを指定すると、受け取った JSON ペイロードが `FIRESTORE_COLLECTION` (デフォルトは `backlog_webhooks`) に保存されます。
+Terraform ではデフォルトで必要な API を有効化し、Cloud Function 用のサービスアカウントと Pub/Sub トピック (必要な場合) を作成します。Artifact Registry へのアクセス権も自動で付与されます。
 
-`LOG_LEVEL` を `DEBUG` にすると、予期しない `500` エラーの原因を追跡するための詳細なログが出力されます。Terraform の `log_level` 変数から設定できます。成功時は INFO レベルでドキュメント ID と書き込み時刻をログに記録するため、Firestore への保存が確認できます。
-
-Terraform の状態ファイルや `function.zip` などのビルド成果物は `.gitignore` で除外しています。不要なファイルがリポジトリに含まれないよう確認してください。
+`.gitignore` には Terraform の状態ファイルや `function.zip` などの生成物を除外する設定が含まれています。

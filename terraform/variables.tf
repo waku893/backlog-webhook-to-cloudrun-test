@@ -10,27 +10,21 @@ variable "region" {
 }
 
 variable "function_name" {
-  description = "Name of the Cloud Function"
+  description = "HTTP Cloud Function name"
   type        = string
   default     = "backlog-webhook-handler"
 }
 
-variable "firestore_collection" {
-  description = "Firestore collection name"
-  type        = string
-  default     = "backlog_webhooks"
-}
-
-variable "manage_firestore_database" {
-  description = "Whether Terraform should create the Firestore database"
+variable "use_pubsub" {
+  description = "Publish webhook payloads to Pub/Sub"
   type        = bool
   default     = false
 }
 
-variable "firestore_database_id" {
-  description = "ID of the Firestore database to create when manage_firestore_database is true"
+variable "pubsub_topic" {
+  description = "Pub/Sub topic name when use_pubsub is true"
   type        = string
-  default     = "backlog-db"
+  default     = "backlog-webhook"
 }
 
 variable "log_level" {
